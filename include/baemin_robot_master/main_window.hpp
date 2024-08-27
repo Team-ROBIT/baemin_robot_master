@@ -46,10 +46,13 @@ public Q_SLOTS:
   void slotUpdateCMD();
 
   void on_estop_clicked();
+  void on_btn_hunter_clicked();
 
 private:
   Ui::MainWindowDesign ui;
   QNode qnode;
+
+  bool hunter_status = false;
 };
 
 }  // namespace baemin_robot_master

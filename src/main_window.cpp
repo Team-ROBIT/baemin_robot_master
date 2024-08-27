@@ -98,4 +98,42 @@ void MainWindow::on_estop_clicked()
   QMessageBox::information(this, "INFO", "ESTOP DONE. PLEASE RESET ROBOT");
 }
 
+void MainWindow::on_btn_hunter_clicked()
+{
+  if (!hunter_status)
+  {
+    system("roslaunch hunter_bringup hunter_robot_base.launch &");
+    ui.btn_hunter->setStyleSheet(
+        "QPushButton {"
+        "background-color: green;"
+        "border-style: solid;"
+        "border-width: 0px;"
+        "border-radius: 100px;"
+        "border-color: green;"
+        "max-width: 220px;"
+        "max-height: 220px;"
+        "min-width: 220px;"
+        "min-height: 220px;"
+        "}");
+    hunter_status = true;
+  }
+  else
+  {
+    system("rosnode kill hunter_base_node &");
+    ui.btn_hunter->setStyleSheet(
+        "QPushButton {"
+        "background-color: red;"
+        "border-style: solid;"
+        "border-width: 0px;"
+        "border-radius: 100px;"
+        "border-color: red;"
+        "max-width: 220px;"
+        "max-height: 220px;"
+        "min-width: 220px;"
+        "min-height: 220px;"
+        "}");
+    hunter_status = false;
+  }
+}
+
 }  // namespace baemin_robot_master

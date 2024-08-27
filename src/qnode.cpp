@@ -138,10 +138,6 @@ void QNode::cmdCallback(const geometry_msgs::TwistConstPtr& cmd)
   cmd_vel[3] = cmd->angular.x;
   cmd_vel[4] = cmd->angular.y;
   cmd_vel[5] = cmd->angular.z;
-  for (auto value : cmd_vel)
-  {
-    std::cout << value << std::endl;
-  }
   Q_EMIT sigCMDUpdate();
 }
 
