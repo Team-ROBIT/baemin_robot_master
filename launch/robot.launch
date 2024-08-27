@@ -7,6 +7,8 @@
     <param name="port" value="$(arg imu_device)"/>
   </include>
 
+  <include file="$(find joy_to_cmd_vel)/launch/joy_to_cmd_vel.launch" />
+
   <node pkg="baemin_robot_master" type="baemin_robot_master" name="baemin_robot_master" output="screen">
     <param name="imu_topic" type="string" value="$(arg imu_topic)" />
   </node>
