@@ -44,6 +44,8 @@ public Q_SLOTS:
   void slotUpdateRPM();
   void slotUpdateIMU();
   void slotUpdateCMD();
+  void slotUpdateLidarTimeout(int num);
+  void slotUpdateLidarOK(int num);
 
   void on_estop_clicked();
   void on_btn_hunter_clicked();

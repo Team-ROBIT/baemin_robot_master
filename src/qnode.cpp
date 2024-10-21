@@ -29,6 +29,12 @@ namespace baemin_robot_master
 
 QNode::QNode(int argc, char** argv) : init_argc(argc), init_argv(argv)
 {
+  laser_topic_list.clear();
+  laser_topic_list.push_back("/lidar1/scan");
+  laser_topic_list.push_back("/lidar2/scan");
+  laser_topic_list.push_back("/lidar3/scan");
+  laser_topic_list.push_back("/lidar4/scan");
+  laser_topic_previous_time.resize(laser_topic_list.size());
 }
 
 QNode::~QNode()
@@ -66,6 +72,21 @@ bool QNode::init()
   hunter_status_sub = n.subscribe<hunter_msgs::HunterStatus>("/hunter_status", 1, &QNode::hunterStatusCallback, this);
   imu_sub = n.subscribe<sensor_msgs::Imu>(imu_topic.c_str(), 1, &QNode::imuCallback, this);
   cmd_vel_sub = n.subscribe<geometry_msgs::Twist>("/cmd_vel", 1, &QNode::cmdCallback, this);
+
+  laser_sub_vec.clear();
+  for (size_t i = 0; i < laser_topic_list.size(); i++)
+  {
+    if (!laser_topic_list[i].empty())
+    {
+      ROS_INFO("laser_topic_list[%zu] : %s", i, laser_topic_list[i].c_str());
+      laser_sub_vec.push_back(
+          n.subscribe<sensor_msgs::LaserScan>(laser_topic_list[i], 1, boost::bind(&QNode::laserCallback, this, _1, i)));
+    }
+    else
+    {
+      ROS_WARN("Empty laser topic at index %zu", i);
+    }
+  }
 
   timer10ms = new QTimer(this);
   timer1s = new QTimer(this);
@@ -141,6 +162,32 @@ void QNode::cmdCallback(const geometry_msgs::TwistConstPtr& cmd)
   Q_EMIT sigCMDUpdate();
 }
 
+void QNode::laserCallback(const sensor_msgs::LaserScanConstPtr& laser, int num)
+{
+  if (num < 0 || num >= static_cast<int>(laser_topic_previous_time.size()))
+  {
+    ROS_ERROR("Invalid laser callback number: %d", num);
+    return;
+  }
+
+  ros::Time laser_topic_current_time = laser->header.stamp;
+  if (!laser_topic_previous_time[num].isZero())
+  {
+    double time_diff = (laser_topic_current_time - laser_topic_previous_time[num]).toSec();
+    if (time_diff > 1.0)
+    {
+      ROS_ERROR("LIDAR[%d] TIMEOUT. PLEASE CHECK YOUR CONNECTION.", num + 1);
+      Q_EMIT sigLidarTimeout(num);
+    }
+    else if (time_diff < 1.0)
+    {
+      // ROS_INFO("LIDAR[%d] OK", num + 1);
+      Q_EMIT sigLidarOK(num);
+    }
+  }
+  laser_topic_previous_time[num] = laser_topic_current_time;
+}
+
 void QNode::eStopCallback(const std_msgs::BoolConstPtr& estop)
 {
   emergencyStop();
@@ -155,12 +202,12 @@ void QNode::onTimer10ms()
 
 void QNode::onTimer1s()
 {
-  comm_cnt++;
-  if (comm_cnt >= 5)
-  {
-    ROS_ERROR("COMMUNICATION LOST. PLEASE CHECK YOUR CONNECTION.");
-    Q_EMIT sigStatusUpdate(false);
-  }
+  // comm_cnt++;
+  // if (comm_cnt >= 5)
+  // {
+  //   ROS_ERROR("COMMUNICATION LOST. PLEASE CHECK YOUR CONNECTION.");
+  //   Q_EMIT sigStatusUpdate(false);
+  // }
 }
 
 void QNode::emergencyStop()

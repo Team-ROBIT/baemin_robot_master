@@ -22,10 +22,12 @@
 #include <ros/ros.h>
 #endif
 #include <string>
+#include <vector>
 #include <QThread>
 #include <QStringListModel>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/Imu.h>
+#include <sensor_msgs/LaserScan.h>
 #include <geometry_msgs/Twist.h>
 #include <std_msgs/Bool.h>
 #include <boost/bind.hpp>
@@ -76,6 +78,8 @@ Q_SIGNALS:
   void sigRPMUpdate();
   void sigIMUUpdate();
   void sigCMDUpdate();
+  void sigLidarTimeout(int num);
+  void sigLidarOK(int num);
 
 public Q_SLOTS:
 
@@ -108,6 +112,11 @@ private:
 
   ros::Subscriber cmd_vel_sub;
   void cmdCallback(const geometry_msgs::TwistConstPtr& cmd);
+
+  std::vector<ros::Subscriber> laser_sub_vec;
+  std::vector<std::string> laser_topic_list;
+  std::vector<ros::Time> laser_topic_previous_time;
+  void laserCallback(const sensor_msgs::LaserScanConstPtr& laser, int num);
 
 private slots:
   void onTimer10ms();

@@ -40,6 +40,8 @@ MainWindow::MainWindow(int argc, char** argv, QWidget* parent) : QMainWindow(par
   QObject::connect(&qnode, SIGNAL(sigRPMUpdate()), this, SLOT(slotUpdateRPM()));
   QObject::connect(&qnode, SIGNAL(sigIMUUpdate()), this, SLOT(slotUpdateIMU()));
   QObject::connect(&qnode, SIGNAL(sigCMDUpdate()), this, SLOT(slotUpdateCMD()));
+  QObject::connect(&qnode, SIGNAL(sigLidarTimeout(int)), this, SLOT(slotUpdateLidarTimeout(int)));
+  QObject::connect(&qnode, SIGNAL(sigLidarOK(int)), this, SLOT(slotUpdateLidarOK(int)));
 }
 
 MainWindow::~MainWindow()
@@ -52,21 +54,21 @@ MainWindow::~MainWindow()
 
 void MainWindow::slotStatusUpdate(bool status)
 {
-  if (status)
-  {
-    ui.isconnected->setText("true");
-    ui.isconnected->setStyleSheet("QLabel { color : green; }");
-  }
-  else if (!status)
-  {
-    ui.isconnected->setText("false");
-    ui.isconnected->setStyleSheet("QLabel { color : red; }");
-  }
+  // if (status)
+  // {
+  //   ui.isconnected->setText("true");
+  //   ui.isconnected->setStyleSheet("QLabel { color : green; }");
+  // }
+  // else if (!status)
+  // {
+  //   ui.isconnected->setText("false");
+  //   ui.isconnected->setStyleSheet("QLabel { color : red; }");
+  // }
 }
 
 void MainWindow::slotUpdateBattery()
 {
-  ui.battery_3->setText(QString::number(qnode.battery_voltage));
+  ui.battery->setText(QString::number(qnode.battery_voltage));
 }
 
 void MainWindow::slotUpdateRPM()
@@ -90,6 +92,53 @@ void MainWindow::slotUpdateCMD()
 {
   ui.linear_x->setText(QString::number(qnode.cmd_vel[0]));
   ui.angular_z->setText(QString::number(qnode.cmd_vel[5]));
+}
+
+void MainWindow::slotUpdateLidarTimeout(int num)
+{
+  switch (num)
+  {
+    case 0:
+      ui.lidar1->setText("Lost");
+      ui.lidar1->setStyleSheet("QLabel { background-color: rgb(254,254,254); font: 11pt; color: red;}");
+      break;
+    case 1:
+      ui.lidar2->setText("Lost");
+      ui.lidar2->setStyleSheet("QLabel { background-color: rgb(254,254,254); font: 11pt; color: red;}");
+      break;
+    case 2:
+      ui.lidar3->setText("Lost");
+      ui.lidar3->setStyleSheet("QLabel { background-color: rgb(254,254,254); font: 11pt; color: red;}");
+      break;
+    case 3:
+      ui.lidar4->setText("Lost");
+      ui.lidar4->setStyleSheet("QLabel { background-color: rgb(254,254,254); font: 11pt; color: red;}");
+      break;
+  }
+}
+
+void MainWindow::slotUpdateLidarOK(int num)
+{
+  // std::cout << "SLOT LIDAR[" << num + 1 << "] OK" << std::endl;
+  switch (num)
+  {
+    case 0:
+      ui.lidar1->setText("Connected");
+      ui.lidar1->setStyleSheet("QLabel { background-color: rgb(254,254,254); font: 11pt; color: green;}");
+      break;
+    case 1:
+      ui.lidar2->setText("Connected");
+      ui.lidar2->setStyleSheet("QLabel { background-color: rgb(254,254,254); font: 11pt; color: green;}");
+      break;
+    case 2:
+      ui.lidar3->setText("Connected");
+      ui.lidar3->setStyleSheet("QLabel { background-color: rgb(254,254,254); font: 11pt; color: green;}");
+      break;
+    case 3:
+      ui.lidar4->setText("Connected");
+      ui.lidar4->setStyleSheet("QLabel { background-color: rgb(254,254,254); font: 11pt; color: green;}");
+      break;
+  }
 }
 
 void MainWindow::on_estop_clicked()

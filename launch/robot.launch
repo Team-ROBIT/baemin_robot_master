@@ -3,7 +3,7 @@
   <arg name="imu_topic" default="/imu" />
   <arg name="imu_device" default="/dev/IMU"/>
 
-  <include file="$(find e2box_imu)/launch/e2box_imu.launch" >
+  <include file="$(find e2box_imu)/launch/robot_imu.launch" >
     <param name="port" value="$(arg imu_device)"/>
   </include>
 
